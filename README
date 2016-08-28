@@ -1,0 +1,17 @@
+Please cite:
+Jieming Chen, Joel Rozowsky, Jason Bedford, Arif Harmanci, Alexej Abyzov, Yong Kong, Robert Kitchen, Lynne Regan, Mark Gerstein. A uniform survey of allele-specific binding and expression over 1000-Genomes-Project individuals. Manuscript under review. 
+and the AlleleDB website (alleledb.gersteinlab.org)
+
+
+Personal genome construction
+*vcf2phased
+-this helper script preprocesses the VCF file by randomly phasing ALL unphased genotypes in a VCF file, so that we can make these 'randomized' genotypes consistent to give 'reproducible' genomes
+-the output feeds into vcf2diploid from AlleleSeq pipeline
+
+
+Allele-specific calculation
+*calc.overdispersion.R
+-given output counts.txt from AlleleSeq, this R script calculates the overdispersion of the dataset
+
+*alleleseq.betabinomial.R
+-given the output counts.txt from AlleleSeq and the overdispersion calculated from above, this R script outputs the allele-specific SNVs that satisfy the FDR cutoff based on a beta-binomial test.
