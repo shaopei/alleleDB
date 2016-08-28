@@ -1,17 +1,275 @@
-Please cite:
-Jieming Chen, Joel Rozowsky, Jason Bedford, Arif Harmanci, Alexej Abyzov, Yong Kong, Robert Kitchen, Lynne Regan, Mark Gerstein. A uniform survey of allele-specific binding and expression over 1000-Genomes-Project individuals. Manuscript under review. 
-and the AlleleDB website (alleledb.gersteinlab.org)
+===================================================================
+README file for the AlleleDB pipeline v2.0
+===================================================================
+2016-04-18
+
+CITATION:
+
+[1] A uniform survey of allele-specific binding and expression over 1000-Genomes-Project individuals
+Chen J, Rozowsky J, Galeev TR, Harmanci A, Kitchen R, Bedford J, Abyzov A, Kong Y, Regan L, Gerstein M. (2016) Nat Communi 7:11101
+[2] AlleleSeq: analysis of allele-specific expression and binding in a network framework.
+J Rozowsky, A Abyzov, J Wang, P Alves, D Raha, A Harmanci, J Leng, R Bjornson, Y Kong, N Kitabayashi, N Bhardwaj, M Rubin, M Snyder, M Gerstein (2011). Mol Syst Biol 7: 522 .
+
+WEB: http://alleledb.gersteinlab.org/
+
+CONTACT: jieming.chen@yale.edu
+-------------------------------------------------------------------
+
+The package includes the AlleleDB pipeline developed in the Gerstein Lab at Yale.  This pipeline was built and applied to perform a uniform identification of SNVs associated with allele-specific binding and expression in 382 individuals from the 1000 Genomes Project [1]. It is based on the AlleleSeq pipeline (README follows below) developed earlier in the lab [2].  New developments include implementation of the beta-binomial test to estimate the statistical significance of the allele-specific event calls and a read filtering algorithm to account for the ambiguous mapping bias.  See the Methods section in [1] for details.  All newly added/modified scripts are prefixed with "alleledb_".
+
+--------------------------------------------------------------------
+Personal genome construction using vcf2diploid
+--------------------------------------------------------------------
+The pipeline requires Bowtie indices (for both haplotypes) of an individual's personal diploid genome and .fastq.gz file(s) of the functional assays (e.g. RNA-seq or ChIP-seq).  The personal diploid genome can be generated using the vcf2diploid tool [2] (http://alleleseq.gersteinlab.org/tools.html).  
+
+The personal genomes of the 382 individuals from the study [1] are available at http://archive.gersteinlab.org/alleledb/personal_genomes/.  Below is an example command to build bowtie indices for each maternal and paternal haplotype of an individual (using the 1000 Genomes Project's individual HG00100 as an example):
+
+bowtie-build --offrate 2 HG00100_pgenome_hg19/1_HG00100_maternal.fa,HG00100_pgenome_hg19/2_HG00100_maternal.fa,HG00100_pgenome_hg19/3_HG00100_maternal.fa,HG00100_pgenome_hg19/4_HG00100_maternal.fa,HG00100_pgenome_hg19/5_HG00100_maternal.fa,HG00100_pgenome_hg19/6_HG00100_maternal.fa,HG00100_pgenome_hg19/7_HG00100_maternal.fa,HG00100_pgenome_hg19/8_HG00100_maternal.fa,HG00100_pgenome_hg19/9_HG00100_maternal.fa,HG00100_pgenome_hg19/10_HG00100_maternal.fa,HG00100_pgenome_hg19/11_HG00100_maternal.fa,HG00100_pgenome_hg19/12_HG00100_maternal.fa,HG00100_pgenome_hg19/13_HG00100_maternal.fa,HG00100_pgenome_hg19/14_HG00100_maternal.fa,HG00100_pgenome_hg19/15_HG00100_maternal.fa,HG00100_pgenome_hg19/16_HG00100_maternal.fa,HG00100_pgenome_hg19/17_HG00100_maternal.fa,HG00100_pgenome_hg19/18_HG00100_maternal.fa,HG00100_pgenome_hg19/19_HG00100_maternal.fa,HG00100_pgenome_hg19/20_HG00100_maternal.fa,HG00100_pgenome_hg19/21_HG00100_maternal.fa,HG00100_pgenome_hg19/22_HG00100_maternal.fa,HG00100_pgenome_hg19/X_HG00100_maternal.fa HG00100_pgenome_hg19/HG00100_maternal > HG00100_pgenome_hg19/bowtie_build.maternal.log
+
+bowtie-build --offrate 2 HG00100_pgenome_hg19/1_HG00100_paternal.fa,HG00100_pgenome_hg19/2_HG00100_paternal.fa,HG00100_pgenome_hg19/3_HG00100_paternal.fa,HG00100_pgenome_hg19/4_HG00100_paternal.fa,HG00100_pgenome_hg19/5_HG00100_paternal.fa,HG00100_pgenome_hg19/6_HG00100_paternal.fa,HG00100_pgenome_hg19/7_HG00100_paternal.fa,HG00100_pgenome_hg19/8_HG00100_paternal.fa,HG00100_pgenome_hg19/9_HG00100_paternal.fa,HG00100_pgenome_hg19/10_HG00100_paternal.fa,HG00100_pgenome_hg19/11_HG00100_paternal.fa,HG00100_pgenome_hg19/12_HG00100_paternal.fa,HG00100_pgenome_hg19/13_HG00100_paternal.fa,HG00100_pgenome_hg19/14_HG00100_paternal.fa,HG00100_pgenome_hg19/15_HG00100_paternal.fa,HG00100_pgenome_hg19/16_HG00100_paternal.fa,HG00100_pgenome_hg19/17_HG00100_paternal.fa,HG00100_pgenome_hg19/18_HG00100_paternal.fa,HG00100_pgenome_hg19/19_HG00100_paternal.fa,HG00100_pgenome_hg19/20_HG00100_paternal.fa,HG00100_pgenome_hg19/21_HG00100_paternal.fa,HG00100_pgenome_hg19/22_HG00100_paternal.fa,HG00100_pgenome_hg19/X_HG00100_paternal.fa HG00100_pgenome_hg19/HG00100_paternal > HG00100_pgenome_hg19/bowtie_build.paternal.log
 
 
-Personal genome construction
-*vcf2phased
--this helper script preprocesses the VCF file by randomly phasing ALL unphased genotypes in a VCF file, so that we can make these 'randomized' genotypes consistent to give 'reproducible' genomes
--the output feeds into vcf2diploid from AlleleSeq pipeline
+--------------------------------------------------------------------
+AlleleDB pipeline
+--------------------------------------------------------------------
+The main pipeline script is alleledb.sh, which is initialized with 11 positional command-line arguments, e.g:
+
+./path-to-/alleledb.sh \
+HG00100 \
+HG00100_pgenome_hg19 \
+/path-to-/HG00100_pgenome_hg19 \
+/path-to-/HG00100_pgenome_hg19/HG00100.snp.calls.bed \
+/path-to-/HG00100_rnaseq \
+HG00100.1.M_111124_6 \
+/path-to-/alleledb_pipeline \
+/path-to-/alleledb_pipeline/PIPELINE.mk \
+0.05 \
+ase \
+0
+
+where the arguments:
+arg1: individual/sample name; must conform with the suffix in the personal genome chromosome and indices names (e.g. 'HG00100' as in the example above)
+arg2: personal genome (folder) name
+arg3: path to the personal genome folder (no '/' at the end) containing bowtie indices, chromosome maps and hetSNP call files
+arg4: path to the hetSNP calls .bed file, format e.g.:
+        chr1    10582   10583   AG
+        chr1    54675   54676   TC
+        chr1    61986   61987   GA
+arg5: path to the folder containing a functional dataset's read files (all .fastq.gz files contained in the folder will be pooled together and used for alignment and read counting)
+arg6: assay-specific naming prefix
+arg7: path to the folder alleledb_pipeline, containing the AlleleDB and AlleleSeq scripts
+arg8: path to the AlleleSeq PIPELINE.mk file
+arg9: FDR threshold
+arg10: "ase" (allele-specific expression) or "asb" (allele-speciific binding). Depending on ASE or ASB, the arguments can slightly vary. Typically, because RNA-seq data has more coverage/reads, the FDR threshold can be lower (more stringent), e.g. 0.05 compared to a threshold for ChIP-seq of 0.1. Also note that the individual/sample name, should include the TFs for ASB, since you would want the folders to be on a per-individual per-TF basis.
+arg11: the pipeline involves 8 steps/modules (each generating a subfolder under allelicbias-[arg3]-[arg1] and respective .log files); arg11 (normally with the value of "0": "run all steps") can be used for debugging/running a specific (1-8) step of the pipeline.
+Running alleledb.sh with "-8" (as the only argument) will remove all files generated by module 8.
 
 
-Allele-specific calculation
-*calc.overdispersion.R
--given output counts.txt from AlleleSeq, this R script calculates the overdispersion of the dataset
+The personal genome folder should contain the following files with the filename format: (1) snp.calls (this tab-delimited file contains the snp calls) and (2) cnv_rd_[arg1]/rd.[arg1].txt (which is the read-depth file generated by the personal genome construction pipeline, AlleleSeq, http://alleleseq.gersteinlab.org/tools.html)
+(1) snp.calls format e.g.:
+1	10583	G	AA	AG	AG	PHASED
+1	54676	C	TA	CA	TC	PHASED
+1	61987	A	GT	AA	GA	PHASED
+(2) rd.HG00100.txt:
+chrm	snppos	rd
+1	10583	33.2008
+1	54676	0.760489
+1	61987	1.17333
 
-*alleleseq.betabinomial.R
--given the output counts.txt from AlleleSeq and the overdispersion calculated from above, this R script outputs the allele-specific SNVs that satisfy the FDR cutoff based on a beta-binomial test.
+The pipeline requires bowtie and intersectBed to be in the path.
+The main output of the pipeline is the file interestingHets.betabinom.txt, listing all HetSNVs associated with allele-specific behavior (that passed the FDR threshold) and formatted similarly to the interestingHets.txt file (see below) generated by the original AlleleSeq pipeline (with a new column - beta-binomial p-values).
+
+The package contains example input files that can be used for a test run of the pipeline (one chromosome example ASE calculation for HG00100) under the ‘test’ directory.
+
+
+
+===================================================================
+The following is the README file for the AlleleSeq pipeline (v1.2a)
+===================================================================
+
+The Allele-specific SNP processing pipeline.  Written by Robert
+Bjornson, Gerstein Lab, Yale University, in collaboration with Joel
+Rozowsky.  Contact robert.bjornson@yale.edu or joel.rozowsky@yale.edu
+with questions or comments.
+
+4/12/2012
+
+There has been a major reworking to the innards of the Pipeline.
+The motivation was to do as much of the processing as possible via
+pipes, so that very little data is written to the disk.
+
+In addition, two columns (Qval and KSval) were removed from the final output 
+(interestingHets.txt), since they were no longer used.
+
+The pipeline currently expects inputs as compressed fastq files, with 
+the suffix .fastq.gz.  If you want it to work on other inputs, you'll
+need to change both PIPELINE.mk and filter_input.sh
+
+Each input file is transformed into a *.cnt file, which is a python pickle
+of the snp counts for that file.  Those file are then combined and a report
+is generated.
+
+Because each mapping task runs two bowties, if you run the makefile in
+parallel, run numprocs/2 tasks.
+ 
+9/20/2010
+
+The basic goal of the pipeline is to take a large collection of reads
+representing ChIP-seq or RNA-seq data from a child in a trio with
+known SNP locations, and detect snps that are significantly skewed to
+one allele.  To do this, we first create references that represent the
+childs' haplotypes (to the best of our ability).  We then map the reads
+to both haplotypes, picking the best match for each read.  This is
+done to eliminate the reference bias that would exist if we mapped to
+the standard reference.  We then count the allele frequency observed
+at each SNP position and look for imbalances, using false discovery
+rate techniques to determine cutoffs.
+
+-----------------------------------------------
+
+The pipeline has six main inputs:
+- one or more collections of unmapped reads.  In our case CHip-seq and
+  RNA-seq from Illumina files.  The pipeline expects fastq format files,
+  with the filename "*.fastq.gz".  All files matching this pattern will be
+  combined into one dataset.  If you have something other than fastq.gz, e.g.
+  bam or fastq, you will need add a preliminary conversion step.  
+
+  As a sanity check, you can use the make target "check" to print out the set of input fastq files.
+
+- a set of SNP locations for a trio.  The make variable SNPS should point to it.
+  The pipeline expects this format:
+chr	pos	ref	Mat	Pat	Child	Phase
+1	114116078	A	TT	TT	TA	MUTANT
+1	114117743	G	CG	GG	GG	HOMO
+1	114120250	C	AC	AA	CA	PHASED
+1	114120756	A	CA	CC	AC	PHASED
+
+Mat and Pat are the maternal and paternal genotypes.
+Child is child's genotype, ordered MatPat if phased.
+
+Phase describes the phasing in the trio.  Possible values are:
+HETERO (all three heterozygous, no phasing possible)
+HOMO (child (subject) is homozygous, not an interesting snp position for our purposes)
+PHASED (child heterozygous and at least one parent homozygous, so phasing was done)
+MUTANT (child genotype is inconsistent with parents' genotype)
+
+- a reference genome, used as a basis for creating the haplotype references for
+the subject.
+
+- a set of known genes, listing transcription start and stop, and exon
+  coordinates, such as UCSC golden path.
+
+- an optional set of ChIP-seq "binding sites", regions in the genome
+where the transcription factor binds.  This will allow filtering of
+SNP locations to just those within binding sites.  If BINDINGSITES is
+set to a non-existent file in the makefile, no filtering will be done.
+
+We used PeakSeek (J. Rozowsky) to determine binding regions.
+The pipeline expects a file with no header in this format (only the first 3 fields will be read):
+chr<tab>start<tab>end ...
+
+The file need not be sorted by chr or start, but the format of chrom names must agree with 
+the other files (usually chr#).
+
+In the makefile, set BINDINGSITES to this file.  You can set it to an empty (but existent)
+file, in which case depth will be set to 1.0 and no filtering will be done.
+
+- a set of normalized read depth values for all snp locations from a
+separate genomic sequencing experiment.  This reports the read depth
+at that snp compared to overall coverage. This is used to filter out
+locations with very low or high coverage, which would tend to indicate
+copy number variation.  The file should be in this format:
+
+chrm    snppos  rd
+1       52066   0.902113
+1       695745  0.909802
+1       742429  0.976435
+
+-----------------------------------------------
+
+The processing follows these steps.
+
+First, in a preliminary step (not part of the pipeline proper) the snp
+calls and the reference genome are combined to generate two new
+reference genomes, corresponding to the inferred maternal and paternal
+haplotypes of the subject.  These two genomes are identical to the
+original reference except in the SNP positions, which are changed to
+be the alleles observed in the subject.  Alleles from SNPS that could
+not be phased are randomly assigned maternal/paternal.  The script
+CreateMirroredGenome.py was used to create these refs.
+
+Pipeline proper: 
+
+For each set of related reads: 
+- The reads are trimmed, if necessary, to remove ends that contain
+large numbers of errors and filtered to remove any reads containing
+N's.
+
+ - The filtered reads are mapped, using bowtie, to the maternal and
+paternal reference genomes.  Bowtie is invoked with these flags:
+--best --strata -v 2 -m 1, which returns only unique hits within a
+minimum number of mismatches, up to two.  This was done to mimic the
+semantics of eland.  By default, for simplicity, the included makefile
+does this step inline.  Some degree of parallelism is possible via the
+-j flag to make, assuming that you are running on a multicore system.
+At Yale, we use a parallel harness developed locally called
+SimpleQueue to do this step in parallel on multiple nodes.  See
+PARALLEL.mk for the parallel pipeline, and
+http://maguro.cs.yale.edu/mediawiki/index.php/SimpleQueue for an
+explanation of the SimpleQueue tool.
+
+ - The two sets of mapped reads are merged into a single set, with
+each read represented at most once, using the better mapping from the
+maternal or paternal reference.  If the two mappings for the same read
+tie in quality, one is chosen at random.
+
+ - Using SNP file and the mapped reads, allele counts are
+generated for each SNP location.  The resulting counts file
+contains the number of As,Cs,Gs, and Ts found in reads mapped over
+each SNP-location.  Various other values are also generated for each
+Het-SNP location, including reference allele, maternal/paternal allele
+(if determinable), major and minor allele, and a binomial pvalue
+assuming a 50/50 probability of sampling each of two alleles.
+
+ - Explicit qvalues are calculated from the observed pvalues.
+
+ - Using a qvalue cutoff, only those Het-SNPs showing significant 
+bias are retained.  This is the filtered counts file for each dataset.
+
+Once, for all counts files: 
+- Using the list of genes and all filtered counts files, information
+about all assymetric Het-SNPs from any of the datasets are grouped
+together by gene.  The locations are annotated as being exonic or
+intronic.  The information about each SNP includes: ref allele;
+maternal and paternal genotype; phasing if determined; A,C,G,T counts;
+biased-towards parent allele; Benjamini-Hochberg corrected pvalue,
+explicitly calculated qvalue.
+
+Programs used in our experiments:
+
+Python 2.5.1
+Bowtie 0.10.0.2 (Bowtie must be in your PATH)
+
+Data files used:
+SNP calls: Pilot 2 SNP calls from CEU.  
+http://hgdownload.cse.ucsc.edu/goldenPath/hg18/database/knownGene.txt.gz Nov 2009.
+Gene locations: UCSC GoldenPath.  
+http://hgdownload.cse.ucsc.edu/goldenPath/hg18/database/knownGene.txt.gz  May 2009.
+Human Reference: Standard HG18 without additional haplotypes
+
+The actual pipeline driver is a makefile run by make in the directory
+containing the read files: make -f <path to>/PIPELINE.mk.  That directory must also
+contain directories called AltRefFather and AltRefMother, which
+contain the haplotype references formatted for bowtie.
+
+Make sure to edit PIPELINE.mk to set the variables as the top of the file,
+especially BASE.
+
+Main output Files:
+counts.txt: Contains count information for all heterozygous SNP locations.
+interestingHets.txt:  This file contains information about all SNP locations that passed
+all these tests:
+ - in a binding site
+ - within range for cnv test
+ - significantly assymetric by FDR test
+
