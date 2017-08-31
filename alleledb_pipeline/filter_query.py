@@ -27,10 +27,8 @@ if __name__=='__main__':
         total+=1
         nindex=seq.find('N')
         if nindex==-1:
-            ofile.write(header)
-            ofile.write(seq)
-            #print >>ofp, header,
-            #print >>ofp, seq,
+            print >>ofp, header,
+            print >>ofp, seq,
         else:
             ns+=1
 
