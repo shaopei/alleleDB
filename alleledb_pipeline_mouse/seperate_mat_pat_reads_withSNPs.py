@@ -82,14 +82,14 @@ def choose(l1, l2, mappers):
         m=mappers[c1]
         if m.trans(1,0,int(e1[3])+1) == m.trans(2,0,int(e2[3])+1): # bowtie is 0-based, but the maps are 1-based
             ident+=1
-            return 3, random.sample([l1, l2], 1)[0]
+            return 3, (l1, l2)
         else:
             skipped +=1 # 3bb) otherwise, skip
             return 0, (l1, l2)
     else:
         if e1[3] == e2[3]: # 3ba)
             ident+=1
-            return 3, random.sample([l1, l2], 1)[0]
+            return 3, (l1, l2)
         else:
             skipped += 1 # 3bb) otherwise, skip
             return 0, (l1, l2)
@@ -115,11 +115,7 @@ def process(f1, f2, mappers, of, logf):
                 dump(of[of_i], use[0])
                 dump(of[of_i], use[1])
             else:
-#                print use
                 dump(of[of_i], use)
-#            else:
-#                dump(of[of_i], use[0])
-#                dump(of[of_i], use[1])
             l1, e1, idx1 = getLine(f1)
             l2, e2, idx2 = getLine(f2)
             continue
