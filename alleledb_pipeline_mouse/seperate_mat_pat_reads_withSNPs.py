@@ -20,10 +20,10 @@ read, with a maximum of 2 errors (--best --strata -m 1 -v 2) Here are the rules:
 The reads should be in the same order, but there will be gaps if one reference produced a hit and the other didn't
  
 The output: 4 bowtie outputs
-mat 2), 3a)
-pat 2), 3a)
-map to the same location and have the same amount of mismatch to mat/pat genome, includes reads with no snps 3ba)
-skipped reads 3bb)
+mat_specific.bowtie: 2), 3a)
+pat_specific.bowtie: 2), 3a)
+pat_identical.bowtie: ONLY keep PAT reads that map to the same location and have the same amount of mismatch to mat genome, includes reads with no snps 3ba)
+pat_skipped.bowtie: skipped reads 3bb), include BOTH MAT and PAT mapping reads.
 '''
 
 ##helper function
