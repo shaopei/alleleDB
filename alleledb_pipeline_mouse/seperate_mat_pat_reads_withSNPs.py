@@ -82,14 +82,14 @@ def choose(l1, l2, mappers):
         m=mappers[c1]
         if m.trans(1,0,int(e1[3])+1) == m.trans(2,0,int(e2[3])+1): # bowtie is 0-based, but the maps are 1-based
             ident+=1
-            return 3, (l1, l2)
+            return 3, l1
         else:
             skipped +=1 # 3bb) otherwise, skip
             return 0, (l1, l2)
     else:
         if e1[3] == e2[3]: # 3ba)
             ident+=1
-            return 3, (l1, l2)
+            return 3, l1
         else:
             skipped += 1 # 3bb) otherwise, skip
             return 0, (l1, l2)
@@ -111,7 +111,6 @@ def process(f1, f2, mappers, of, logf):
         if idx1==idx2:
             of_i, use=choose(l1, l2, mappers)
             if len(use)==2 :
-                print use
                 dump(of[of_i], use[0])
                 dump(of[of_i], use[1])
             else:
@@ -150,9 +149,9 @@ if __name__=='__main__':
     f2=open(sys.argv[2]) #f2='/workdir/sc2457/mouse_AlleleSpecific/allelicbias-PersonalGenome_P.CAST_M.B6-LEP_ZYG_ATGCA_forAlleleDB/LEP_ZYG_ATGCA_forAlleleDB.pat.bowtie_sorted'
     maptmplt=sys.argv[3]
     mappers=utils.makeMappers(maptmplt)
-    of1 = open(sys.argv[1]+'_specific', 'w')
-    of2 = open(sys.argv[2]+'_specific', 'w')
-    of3 = open(".".join(sys.argv[1].split('.')[0:-2])+'_ident.bowtie', 'w')
-    of0 = open(".".join(sys.argv[1].split('.')[0:-2])+'_skipped.bowtie', 'w')
+    of1 = open(sys.argv[1]+'_specific.bowtie', 'w')
+    of2 = open(sys.argv[2]+'_specific.bowtie', 'w')
+    of3 = open(sys.argv[1]+'_identical.bowtie', 'w')
+    of0 = open(sys.argv[1]+'_skipped.bowtie', 'w')
     of=[of0, of1, of2, of3]
     process(f1, f2, mappers, of, sys.stderr)
