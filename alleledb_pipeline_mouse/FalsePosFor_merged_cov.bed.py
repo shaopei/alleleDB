@@ -55,7 +55,7 @@ def simpval2(cnt,bm):
 if __name__=='__main__':
     ifile=sys.argv[1]
     sims=int(sys.argv[2])
-    data = numpy.loadtxt(ifile, dtype=str ,delimiter='\t', usecols=range(0,9), skiprows=1)
+    data = numpy.loadtxt(ifile, dtype=str ,delimiter='\t', usecols=range(0,9), skiprows=0)
     #verbose=False
     verbose = len(sys.argv)==5 and sys.argv[4]=='-v'
     bestFDR=bestPV=None
