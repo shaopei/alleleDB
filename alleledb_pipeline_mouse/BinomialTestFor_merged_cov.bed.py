@@ -34,9 +34,9 @@ for i in xrange(len(mat)):
         
 
 with open(f_out, 'w') as out:
-    out.write("\t".join(['chrm','chrmStart', 'chrmEnd', 'hmm+BinomialTest', 'hmm_state','mat_allele_count','pat_allele_count','identical_reads_count','Binom_p_value']))
+    out.write("\t".join(['chrm','chrmStart', 'chrmEnd', 'hmm_state','hmm+BinomialTest','mat_allele_count','pat_allele_count','identical_reads_count','Binom_p_value']))
     out.write("\n")
     for i in xrange(len(p_value_list)):
-        out.write("\t".join(list(data[i,0:3])+[binomtest_state[i]]+list(data[i,3:7])+[str(p_value_list[i])]))
+        out.write("\t".join(list(data[i,0:4])+[binomtest_state[i]]+list(data[i,4:7])+[str(p_value_list[i])]))
         out.write("\n")
 
