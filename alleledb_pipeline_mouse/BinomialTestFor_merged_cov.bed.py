@@ -1,3 +1,5 @@
+# output of BinomialTestFor_merged_cov.bed.py: if p-value <= 0.05, remain what it got from hmm (can ne M,P, or S), otherwise S.
+
 import numpy as np
 from math import *
 import scipy.stats
