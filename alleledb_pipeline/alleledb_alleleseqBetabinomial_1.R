@@ -1,7 +1,7 @@
 ## allow cmd line arguments
 args=(commandArgs(TRUE))
 setwd(args[1])
-FDR.thresh = args[2]
+FDR.thresh = as.numeric(args[2])
 
 ## start script here
 library(VGAM)
