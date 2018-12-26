@@ -39,10 +39,11 @@ data1$p.betabin = p.betabin
 ## simulations
 step = 0.0001
 p.thresh = data.frame( c(seq(0,0.01,by=0.001), seq(0.01,0.1,by=0.01)[-1], seq(0.1,1,by=0.1)[-1]) ) #
+colnames(p.thresh)="p"
 cutoff <- function(x,y) sum(y<=x)
 
 ## calc fp from null and empirical counts
-fp <- function(w,p,p.thresh,distrib="binomial",b=0)
+fp <- function(w,p,p.thresh,distrib="binomial",rho=0)
 {
   ## doing the distribution; as.integer converts table entities to integers
   a=lapply(as.integer(w[,1]),function(x) seq(0,x))
@@ -53,7 +54,7 @@ fp <- function(w,p,p.thresh,distrib="binomial",b=0)
   }
   else if(distrib == "betabinomial")
   { 
-    b = lapply(a,function(x) apply(as.data.frame(2*pbetabinom(x,max(x),p,b)),1,function(x) min(x,1)))
+    b = lapply(a,function(x) apply(as.data.frame(2*pbetabinom(x,max(x),p,rho)),1,function(x) min(x,1)))
   }
   
   ## find which ones are below threshold u
@@ -78,7 +79,9 @@ fp.binomial = apply(p.thresh,1,function(x) fp(w,p,x,"binomial"))
 fp.binomial = as.data.frame(cbind(p.thresh,fp.binomial))
 colnames(fp.binomial) = c("pval","FP.bin")
 
-fp.betabinomial = apply(p.thresh,1,function(x) fp(w,p,x,"betabinomial",b))
+library(parallel)
+fp.betabinomial = unlist(mclapply(p.thresh$p,function(x) fp(w,p,x,"betabinomial",b), mc.cores = 20))
+#fp.betabinomial = apply(p.thresh,1,function(x) fp(w,p,x,"betabinomial",b))
 fp.betabinomial = as.data.frame(cbind(p.thresh,fp.betabinomial))
 colnames(fp.betabinomial) = c("pval","FP.betabin")
 
