@@ -22,7 +22,7 @@ The reads should be in the same order, but there will be gaps if one reference p
 The output: 4 bowtie outputs
 mat_specific.bowtie: 2), 3a)
 pat_specific.bowtie: 2), 3a)
-mat_identical.bowtie: ONLY keep PAT reads that map to the same location and have the same amount of mismatch to mat genome, includes reads with no snps 3ba)
+mat_identical.bowtie: ONLY keep MAT reads that map to the same location and have the same amount of mismatch to mat genome, includes reads with no snps 3ba)
 pat_skipped.bowtie: skipped reads 3bb), include BOTH MAT and PAT mapping reads.
 '''
 
