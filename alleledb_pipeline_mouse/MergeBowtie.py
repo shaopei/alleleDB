@@ -29,7 +29,7 @@ import utils
 def dump(fp, l):
     print >>fp, l,
 
-def score(e):
+def score(e): #4:T>C,10:T>C
     if len(e) != 8:
         return 0
     else:
@@ -41,7 +41,7 @@ def choose(l1, l2, mappers):
     e2=l2.rstrip().split('\t')
 
     assert e1[0]==e2[0]
-    s1=score(e1)
+    s1=score(e1)  #4:T>C,10:T>C
     s2=score(e2)
 
     c1=utils.formatChrom(e1[2].split('_')[0])
