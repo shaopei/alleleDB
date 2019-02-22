@@ -1,11 +1,18 @@
 import sys
+import gzip
 
 with open(sys.argv[3], 'r') as blkf:
 	blkd={}
 	for line in blkf:
 		blkd[line[:-1]]=None
 
-inp=open(sys.argv[1], 'r')
+try:
+	inp=open(sys.argv[1], 'r')
+except:
+	print "in except"
+	inp=gzip.open(sys.argv[1], 'r')
+
+
 log=open('.'.join(sys.argv[1].split('.')[:-1])+'.filter_reads_out.log', 'w')
 
 if sys.argv[2]=='-': 
