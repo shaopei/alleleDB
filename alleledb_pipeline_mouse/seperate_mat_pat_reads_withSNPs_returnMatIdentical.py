@@ -22,7 +22,7 @@ The reads should be in the same order, but there will be gaps if one reference p
 The output: 4 bowtie outputs
 mat_specific.bowtie: 2), 3a)
 pat_specific.bowtie: 2), 3a)
-pat_identical.bowtie: ONLY keep PAT reads that map to the same location and have the same amount of mismatch to mat genome, includes reads with no snps 3ba)
+mat_identical.bowtie: ONLY keep PAT reads that map to the same location and have the same amount of mismatch to mat genome, includes reads with no snps 3ba)
 pat_skipped.bowtie: skipped reads 3bb), include BOTH MAT and PAT mapping reads.
 '''
 
@@ -82,14 +82,14 @@ def choose(l1, l2, mappers):
         m=mappers[c1]
         if m.trans(1,0,int(e1[3])+1) == m.trans(2,0,int(e2[3])+1): # bowtie is 0-based, but the maps are 1-based
             ident+=1
-            return 3, l1
+            return 3, l2
         else:
             skipped +=1 # 3bb) otherwise, skip
             return 0, (l1, l2)
     else:
         if e1[3] == e2[3]: # 3ba)
             ident+=1
-            return 3, l1
+            return 3, l2
         else:
             skipped += 1 # 3bb) otherwise, skip
             return 0, (l1, l2)
@@ -151,7 +151,7 @@ if __name__=='__main__':
     mappers=utils.makeMappers(maptmplt)
     of1 = open(sys.argv[1]+'_specific.bowtie', 'w')
     of2 = open(sys.argv[2]+'_specific.bowtie', 'w')
-    of3 = open(sys.argv[1]+'_identical.bowtie', 'w')
+    of3 = open(sys.argv[2]+'_identical.bowtie', 'w')
     of0 = open(sys.argv[1]+'_skipped.bowtie', 'w')
     of=[of0, of1, of2, of3]
     process(f1, f2, mappers, of, sys.stderr)
