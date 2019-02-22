@@ -6,11 +6,17 @@ with open(sys.argv[3], 'r') as blkf:
 	for line in blkf:
 		blkd[line[:-1]]=None
 
-try:
-	inp=open(sys.argv[1], 'r')
-except:
-	print "in except"
-	inp=gzip.open(sys.argv[1], 'r')
+def opener(filename):
+    f = open(filename,'rb')
+    if (f.read(2) == '\x1f\x8b'):
+        f.seek(0)
+        return gzip.GzipFile(fileobj=f)
+    else:
+        f.seek(0)
+        return f
+
+inp=opener(sys.argv[1])
+
 
 
 log=open('.'.join(sys.argv[1].split('.')[:-1])+'.filter_reads_out.log', 'w')
