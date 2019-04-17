@@ -13,7 +13,8 @@ f_out = argv[2]
 
 mat  = np.loadtxt(f_int, dtype=int ,delimiter='\t', usecols=[4], skiprows=0)
 pat = np.loadtxt(f_int, dtype=int ,delimiter='\t', usecols=[5], skiprows=0)
-data = np.loadtxt(f_int, dtype=str ,delimiter='\t', usecols=range(0,7), skiprows=0)
+#data = np.loadtxt(f_int, dtype=str ,delimiter='\t', usecols=range(0,7), skiprows=0)
+data = np.array([l.strip().split("\t") for l in open(f_int).readlines()])
 hmm_states = data[:,3]
 total = mat + pat
 
@@ -39,6 +40,9 @@ with open(f_out, 'w') as out:
     out.write("\t".join(['#chrm','chrmStart', 'chrmEnd', 'hmm_state','hmm+BinomialTest','mat_allele_count','pat_allele_count','identical_reads_count','Binom_p_value']))
     out.write("\n")
     for i in xrange(len(p_value_list)):
-        out.write("\t".join(list(data[i,0:4])+[binomtest_state[i]]+list(data[i,4:7])+[str(p_value_list[i])]))
+        if data.shape[1] >= 7:
+            out.write("\t".join(list(data[i,0:4])+[binomtest_state[i]]+list(data[i,4:7])+[str(p_value_list[i])]+list(data[i,7:data.shape[1]])))
+        else:
+            out.write("\t".join(list(data[i,0:4])+[binomtest_state[i]]+list(data[i,4:7])+[str(p_value_list[i])]))
         out.write("\n")
 
