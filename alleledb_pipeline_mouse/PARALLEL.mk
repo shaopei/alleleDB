@@ -33,19 +33,19 @@ vars:
 
 #convert fastq files to eland_query, if needed
 #%_eland_query.txt:%_fastq.txt   # figure out how to do this conditionally
-#	python $(PL)/fastq2result.py $< $@
+#	python2 $(PL)/fastq2result.py $< $@
 
 # remove any reads containing Ns
 %_filtered_query.txt:%_eland_query.txt
-	python $(PL)/filter_query.py $< $@
+	python2 $(PL)/filter_query.py $< $@
 
 # create joblist for sqPBS.py
 job.list: $(filteredfiles)
-	python $(PL)/MakeJobList.py $(PL) $(filteredfiles) > job.list
+	python2 $(PL)/MakeJobList.py $(PL) $(filteredfiles) > job.list
 
 # setup parallel bowtie run file
 bowtie.pbs: job.list
-	python $(PL)/sqPBS.py d 4 Allele Pipeline job.list > bowtie.pbs # fix the 4 to use length of job.list, fix title
+	python2 $(PL)/sqPBS.py d 4 Allele Pipeline job.list > bowtie.pbs # fix the 4 to use length of job.list, fix title
 
 # This is the simple sequential version
 #BOWTIEDONE: job.list
@@ -56,20 +56,20 @@ bowtie.pbs: job.list
 BOWTIEDONE: bowtie.pbs
 	rm -f job.list.REMAINING
 	qsub bowtie.pbs
-	python $(PL)/waitfor.py job.list.REMAINING
+	python2 $(PL)/waitfor.py job.list.REMAINING
 	touch BOWTIEDONE
 
 # Merge hits from both haplotypes, keeping best hit.  Also separate bowtie results by chromosome.  
 MERGEDONE: BOWTIEDONE $(bowtiehitfiles)
 	rm -f combined_AltRef.chr*
-	#python $(PL)/MergeDriver.py $(MAPS) | awk '{ print $$0 >> "combined_AltRef."$$3}' # $$ escapes $
-	python $(PL)/MergeDriver.py $(MAPS) > combined_AltRef
+	#python2 $(PL)/MergeDriver.py $(MAPS) | awk '{ print $$0 >> "combined_AltRef."$$3}' # $$ escapes $
+	python2 $(PL)/MergeDriver.py $(MAPS) > combined_AltRef
 	awk '{ split($$3,a,"_") ; print $$0 >> "combined_AltRef."a[1]}' < combined_AltRef # $$ escapes $                                                 
 	touch MERGEDONE
 
 # process the mapped reads to generate counts at known snp locations
 counts.txt: MERGEDONE
-	python $(PL)/GetSnpCounts.py 5 $(SNPS) combined_AltRef.chr%s $(MAPS) $(BINDINGSITES) $(CNVS) counts.txt counts.log counts.ks
+	python2 $(PL)/GetSnpCounts.py 5 $(SNPS) combined_AltRef.chr%s $(MAPS) $(BINDINGSITES) $(CNVS) counts.txt counts.log counts.ks
 
 #filter the counts
 counts_passed.txt: counts.txt
@@ -78,11 +78,11 @@ counts_passed.txt: counts.txt
 # augment the counts with a Benjamini Hochberg qvalue, and flag as asymmetric using cutoff 
 # This was superceded by FDR calc below, but included in output file anyway.
 counts_qval.txt: counts_passed.txt
-	python $(PL)/NewAddQValue.py $(QVAL_CUTOFF) counts_passed.txt counts_qval.txt
+	python2 $(PL)/NewAddQValue.py $(QVAL_CUTOFF) counts_passed.txt counts_qval.txt
 
 # calculate false discovery rates
 FDR.txt: counts_qval.txt
-	python $(PL)/FalsePos.py counts_qval.txt $(FDR_SIMS) $(FDR_CUTOFF) > FDR.txt
+	python2 $(PL)/FalsePos.py counts_qval.txt $(FDR_SIMS) $(FDR_CUTOFF) > FDR.txt
 
 # filter for counts that are significant
 interestingHets.txt: counts_qval.txt FDR.txt

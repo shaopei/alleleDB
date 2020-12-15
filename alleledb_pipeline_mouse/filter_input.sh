@@ -4,4 +4,4 @@
 PL=$1
 INFILE=$2
 
-zcat ${INFILE} | python ${PL}/fastq2result.py - - |  python ${PL}/filter_query.py - - | python ${PL}/ConvertTags.py 
+zcat ${INFILE} | python2 ${PL}/fastq2result.py - - |  python2 ${PL}/filter_query.py - - | python2 ${PL}/ConvertTags.py 

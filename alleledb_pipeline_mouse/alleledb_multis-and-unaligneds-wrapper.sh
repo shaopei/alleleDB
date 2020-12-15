@@ -15,7 +15,7 @@ sed 's/\#\*o\*\#/\t/g' ${FILE2} | awk '{OFS="\t"}{FS="\t"}{print $4,$1,$2,$3,$5,
 
 ## grep only read ids in unaligned file
 #grep "^@" $FILE1 | sed 's/^@//g' | sed '1i\id' > ${FILE1}.reads
-python ${PL}/fastq2result.py ${FILE1} - | grep "^>" | sed 's/^>//g' | sort | uniq | sed '1i\id' > ${FILE1}.reads 
+python2 ${PL}/fastq2result.py ${FILE1} - | grep "^>" | sed 's/^>//g' | sort | uniq | sed '1i\id' > ${FILE1}.reads 
 
 ## fsieve -- obtain where the original (unflipped) maternal reads are in the reference genome coordinates
 ${PL}/fsieve -s ${FILE1}.reads ${FILE2}.reads -o original${MATPAT}reads.${FILE1}

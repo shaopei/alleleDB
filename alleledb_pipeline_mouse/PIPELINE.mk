@@ -25,10 +25,10 @@ all: interestingHets.txt
 
 
 $(countfiles): $(PATBOWTIE) $(MATBOWTIE)
-	bash -c "python $(PL)/MergeBowtie.py \
-           <(python $(PL)/filter_reads_out.py $(PATBOWTIE) - $(READS2FILTER)) \
-           <(python $(PL)/filter_reads_out.py $(MATBOWTIE) - $(READS2FILTER)) \
-           $(MAPS) | python $(PL)/SnpCounts.py $(SNPS) - $(MAPS) $@"
+	bash -c "python2 $(PL)/MergeBowtie.py \
+           <(python2 $(PL)/filter_reads_out.py $(PATBOWTIE) - $(READS2FILTER)) \
+           <(python2 $(PL)/filter_reads_out.py $(MATBOWTIE) - $(READS2FILTER)) \
+           $(MAPS) | python2 $(PL)/SnpCounts.py $(SNPS) - $(MAPS) $@"
 
 
 
@@ -39,11 +39,11 @@ check:
 
 
 counts.txt: $(countfiles)
-	python $(PL)/CombineSnpCounts.py 6 $(SNPS) $(BNDS) $(CNVS) counts.txt counts.log $(countfiles)
+	python2 $(PL)/CombineSnpCounts.py 6 $(SNPS) $(BNDS) $(CNVS) counts.txt counts.log $(countfiles)
 
 # calculate false discovery rates
 FDR.txt: counts.txt
-	python $(PL)/FalsePos.py counts.txt $(FDR_SIMS) $(FDR_CUTOFF) > FDR.txt
+	python2 $(PL)/FalsePos.py counts.txt $(FDR_SIMS) $(FDR_CUTOFF) > FDR.txt
 
 interestingHets.txt: counts.txt FDR.txt
 	awk -f $(PL)/finalFilter.awk thresh=$(shell awk 'END {print $$6}' FDR.txt) < counts.txt > interestingHets.txt
